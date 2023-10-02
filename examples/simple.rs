@@ -4,7 +4,7 @@ fn main() {
     println!("{}", ["foo", "bar", "baz"].iter().join(", "));
     println!("{}", ['a', 'b', 'c'].iter().join(", "));
     println!("{}", ["foo".to_owned(), "bar".to_owned(), "baz".to_owned()].iter().join(", "));
-    println!("{}", vec![1, 2, 3].iter().join(", "));
+    println!("{}", vec![1, 2, 3].iter().cycle().take(5).join(", "));
     println!("{}", "äüö".chars().join(' '));
 
     // inefficient temporary string

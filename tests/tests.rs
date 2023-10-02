@@ -59,4 +59,5 @@ fn into_impl() {
 #[test]
 fn display_impl() {
     assert_eq!(format!("<{}>", ["foo", "bar", "baz"].iter().join(", ")), "<foo, bar, baz>");
+    assert_eq!(format!("<{}>", [1, 2, 3].iter().cycle().take(5).join(", ")), "<1, 2, 3, 1, 2>");
 }
