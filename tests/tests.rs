@@ -1,4 +1,4 @@
-use join_string::{Join, StringJoiner};
+use join_string::{Join, Joiner};
 
 #[test]
 fn basic() {
@@ -53,7 +53,7 @@ fn complex_exprs() {
 fn into_impl() {
     let str: String = [1, 2, 3].iter().join(" + ").into();
     assert_eq!(str, "1 + 2 + 3");
-    assert_eq!(<StringJoiner<_, _> as Into<String>>::into("äüö".chars().join(' ')), "ä ü ö");
+    assert_eq!(<Joiner<_, _> as Into<String>>::into("äüö".chars().join(' ')), "ä ü ö");
 }
 
 #[test]
