@@ -16,6 +16,10 @@ fn types() {
     assert_eq!([1, 2, 3].iter().join("").into_string(), "123");
     assert_eq!(["foo".to_owned(), "bar".to_owned(), "baz".to_owned()].iter().join(", ").into_string(), "foo, bar, baz");
     assert_eq!(vec![format_args!("{:02}", 1), format_args!("{:.1} {}", 3.0, 4)].iter().join(' ').into_string(), "01 3.0 4");
+    let items: [&dyn std::fmt::Display; 4] = [
+        &Box::new("foo"), &"bar", &'z', &"bla".to_owned()
+    ];
+    assert_eq!(items.iter().join(", ").into_string(), "foo, bar, z, bla");
 }
 
 #[test]
