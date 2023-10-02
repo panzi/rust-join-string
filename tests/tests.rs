@@ -12,10 +12,19 @@ fn basic() {
 
 #[test]
 fn types() {
-    assert_eq!(['a', 'b', 'c'].iter().join(", ".to_owned()).into_string(), "a, b, c");
+    assert_eq!(['a', 'b', 'c'].iter().join(", ".to_owned()).to_string(), "a, b, c");
     assert_eq!([1, 2, 3].iter().join("").into_string(), "123");
-    assert_eq!(["foo".to_owned(), "bar".to_owned(), "baz".to_owned()].iter().join(", ").into_string(), "foo, bar, baz");
-    assert_eq!(vec![format_args!("{:02}", 1), format_args!("{:.1} {}", 3.0, 4)].iter().join(' ').into_string(), "01 3.0 4");
+    assert_eq!([
+            "foo".to_owned(),
+            "bar".to_owned(),
+            "baz".to_owned()
+        ].iter().join(", ").into_string(),
+        "foo, bar, baz");
+    assert_eq!(vec![
+            format_args!("{:02}", 1),
+            format_args!("{:.1} {}", 3.0, 4)
+        ].iter().join(' ').into_string(),
+        "01 3.0 4");
     let items: [&dyn std::fmt::Display; 4] = [
         &Box::new("foo"), &"bar", &'z', &"bla".to_owned()
     ];
@@ -25,6 +34,19 @@ fn types() {
             "".chars().join("bla")
         ].iter().join("ab".chars().join(',')).into_string(),
         "a,b");
+}
+
+#[test]
+fn complex_exprs() {
+    assert_eq!("a bcd ef".split_whitespace()
+        .map(str::len)
+        .join(", ")
+        .into_string(), "1, 3, 2");
+
+    assert_eq!("foo bar baz".split_whitespace()
+        .map(|s| s.chars().rev().join(""))
+        .join(" ")
+        .into_string(), "oof rab zab");
 }
 
 #[test]

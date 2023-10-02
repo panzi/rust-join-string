@@ -1,4 +1,22 @@
+/// Trait that provides a method to join elements of an iterator, interspercing a separator between all elements.
+/// 
+/// ```
+/// use join_string::StringJoin;
+/// 
+/// assert_eq!("foo bar baz".split_whitespace().join(", ").into_string(), "foo, bar, baz");
+/// 
+/// println!("{}",
+///     "foo bar baz".split_whitespace()
+///         .map(|s| s.chars().rev().join(""))
+///         .join(' '));
+/// // Output: oof rab zab
+/// ```
 pub trait StringJoin<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+    /// Joins elements of an iterator, interspercing the given separator between all elements.
+    /// 
+    /// The return value is a [`StringJoiner`] that hasn't done the joining yet. It either can be
+    /// used wherever a [`std::fmt::Display`] is expected (e.g. when formatting), or you can convert
+    /// it into a [`String`] using the [`StringJoiner::into_string()`] method.
     fn join(self, sep: S) -> StringJoiner<I, S>;
 }
 
@@ -9,6 +27,7 @@ pub struct StringJoiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display
 }
 
 impl<I, S> StringJoiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+    /// Consumes the backing iterator of a [`StringJoiner`] and returns the joined elements as a new [`String`].
     #[inline]
     pub fn into_string(self) -> String {
         let mut buffer = String::new();
@@ -16,11 +35,7 @@ impl<I, S> StringJoiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display
         return buffer;
     }
 
-    #[inline]
-    pub fn to_string(&self) -> String where I: Clone {
-        return format!("{}", self);
-    }
-
+    /// Consumes the backing iterator of a [`StringJoiner`] and writes the joined elements into a [`std::fmt::Write`].
     pub fn write_into<W: std::fmt::Write>(mut self, writer: &mut W) {
         if let Some(first) = self.iter.next() {
             let _ = write!(writer, "{}", first);
