@@ -1,11 +1,11 @@
 pub trait StringJoin<I, S> where I: std::iter::Iterator, S: AsRef<str>, I::Item: std::fmt::Display {
-    fn join(self, delim: S) -> StringJoiner<I, S>;
+    fn join(self, sep: S) -> StringJoiner<I, S>;
 }
 
 #[derive(Debug)]
 pub struct StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<str> {
     iter: I,
-    delim: S
+    sep: S
 }
 
 impl<I, S> StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<str>, I::Item: std::fmt::Display {
@@ -24,9 +24,9 @@ impl<I, S> StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<str>, I::It
     pub fn write_into<W: std::fmt::Write>(mut self, buffer: &mut W) {
         if let Some(first) = self.iter.next() {
             let _ = write!(buffer, "{}", first);
-            let delim = self.delim.as_ref();
+            let sep = self.sep.as_ref();
             while let Some(item) = self.iter.next() {
-                let _ = write!(buffer, "{}{}", delim, item);
+                let _ = write!(buffer, "{}{}", sep, item);
             }
         }
     }
@@ -44,25 +44,25 @@ impl<I, S> Clone for StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<s
     fn clone(&self) -> Self {
         StringJoiner {
             iter: self.iter.clone(),
-            delim: self.delim.clone()
+            sep: self.sep.clone()
         }
     }
 }
 
 impl<I, S> StringJoin<I, S> for I where I: std::iter::Iterator, I::Item: std::fmt::Display, S: AsRef<str> {
     #[inline]
-    fn join(self, delim: S) -> StringJoiner<I, S> {
+    fn join(self, sep: S) -> StringJoiner<I, S> {
         StringJoiner {
             iter: self,
-            delim
+            sep
         }
     }
 }
 
 impl<'a, T, S> StringJoin<core::slice::Iter<'a, T>, S> for &'a [T] where T: std::fmt::Display, S: AsRef<str> {
     #[inline]
-    fn join(self, delim: S) -> StringJoiner<core::slice::Iter::<'a, T>, S> {
-        self.iter().join(delim)
+    fn join(self, sep: S) -> StringJoiner<core::slice::Iter::<'a, T>, S> {
+        self.iter().join(sep)
     }
 }
 
@@ -71,9 +71,9 @@ impl<I, S> std::fmt::Display for StringJoiner<I, S> where I: std::iter::Iterator
         let mut iter = self.iter.clone();
         if let Some(first) = iter.next() {
             first.fmt(f)?;
-            let delim = self.delim.as_ref();
+            let sep = self.sep.as_ref();
             while let Some(item) = iter.next() {
-                delim.fmt(f)?;
+                sep.fmt(f)?;
                 item.fmt(f)?;
             }
         }
