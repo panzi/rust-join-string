@@ -4,10 +4,10 @@ join-string
 A simple crate to join the elements of iterators, interspercing a separator between all elements.
 
 This is done somewhat efficiently, if possible, meaning if the iterator is cheaply clonable you can
-directly print the result of `StringJoin::join()` without creating a temporary `String` in memory.
+directly print the result of `Join::join()` without creating a temporary `String` in memory.
 
 ```Rust
-use join_string::StringJoin;
+use join_string::Join;
 
 assert_eq!(
     "foo bar baz".split_whitespace().join(", ").into_string(),

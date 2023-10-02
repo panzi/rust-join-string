@@ -1,10 +1,10 @@
 //! A simple crate to join the elements of iterators, interspercing a separator between all elements.
 //! 
 //! This is done somewhat efficiently, if possible, meaning if the iterator is cheaply clonable you can
-//! directly print the result of [`StringJoin::join()`] without creating a temporary [`String`] in memory.
+//! directly print the result of [`Join::join()`] without creating a temporary [`String`] in memory.
 //!
 //! ```
-//! use join_string::StringJoin;
+//! use join_string::Join;
 //! 
 //! assert_eq!(
 //!     "foo bar baz".split_whitespace().join(", ").into_string(),
@@ -18,8 +18,7 @@
 //! ```
 
 /// Trait that provides a method to join elements of an iterator, interspercing a separator between all elements.
-/// 
-pub trait StringJoin<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+pub trait Join<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
     /// Joins elements of an iterator, interspercing the given separator between all elements.
     /// 
     /// The return value is a [`StringJoiner`] that hasn't done the joining yet. It either can be
@@ -71,7 +70,7 @@ impl<I, S> Clone for StringJoiner<I, S> where I: std::iter::Iterator, S: std::fm
     }
 }
 
-impl<I, S> StringJoin<I, S> for I where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
+impl<I, S> Join<I, S> for I where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
     #[inline]
     fn join(self, sep: S) -> StringJoiner<I, S> {
         StringJoiner {
@@ -81,7 +80,7 @@ impl<I, S> StringJoin<I, S> for I where I: std::iter::Iterator, I::Item: std::fm
     }
 }
 
-impl<'a, T, S> StringJoin<core::slice::Iter<'a, T>, S> for &'a [T] where T: std::fmt::Display, S: std::fmt::Display {
+impl<'a, T, S> Join<core::slice::Iter<'a, T>, S> for &'a [T] where T: std::fmt::Display, S: std::fmt::Display {
     #[inline]
     fn join(self, sep: S) -> StringJoiner<core::slice::Iter::<'a, T>, S> {
         self.iter().join(sep)

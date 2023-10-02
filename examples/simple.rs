@@ -1,4 +1,4 @@
-use join_string::StringJoin;
+use join_string::Join;
 
 fn main() {
     println!("{}", ["foo", "bar", "baz"].iter().join(", "));

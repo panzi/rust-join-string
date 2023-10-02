@@ -1,4 +1,4 @@
-use join_string::{StringJoin, StringJoiner};
+use join_string::{Join, StringJoiner};
 
 #[test]
 fn basic() {

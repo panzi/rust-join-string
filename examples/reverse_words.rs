@@ -1,4 +1,4 @@
-use join_string::StringJoin;
+use join_string::Join;
 
 pub fn reverse_words(s: impl AsRef<str>) -> String {
     s.as_ref().split_whitespace()
