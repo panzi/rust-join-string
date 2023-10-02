@@ -61,3 +61,21 @@ fn display_impl() {
     assert_eq!(format!("<{}>", ["foo", "bar", "baz"].iter().join(", ")), "<foo, bar, baz>");
     assert_eq!(format!("<{}>", [1, 2, 3].iter().cycle().take(5).join(", ")), "<1, 2, 3, 1, 2>");
 }
+
+#[test]
+fn write_fmt() -> std::fmt::Result {
+    let mut buffer = String::new();
+    ["foo", "bar", "baz"].iter().join(", ").write_fmt(&mut buffer)?;
+    assert_eq!(buffer, "foo, bar, baz");
+
+    Ok(())
+}
+
+#[test]
+fn write_io() -> std::io::Result<()> {
+    let mut buffer: Vec<u8> = Vec::new();
+    ["foo", "bar", "baz"].iter().join(", ").write_io(&mut buffer)?;
+    assert_eq!(buffer, b"foo, bar, baz");
+
+    Ok(())
+}

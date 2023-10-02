@@ -38,18 +38,30 @@ impl<I, S> StringJoiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display
     #[inline]
     pub fn into_string(self) -> String {
         let mut buffer = String::new();
-        self.write_join(&mut buffer);
+        let _ = self.write_fmt(&mut buffer);
         return buffer;
     }
 
     /// Consumes the backing iterator of a [`StringJoiner`] and writes the joined elements into a [`std::fmt::Write`].
-    pub fn write_join<W: std::fmt::Write>(mut self, writer: &mut W) {
+    pub fn write_fmt<W: std::fmt::Write>(mut self, mut writer: W) -> std::fmt::Result {
         if let Some(first) = self.iter.next() {
-            let _ = write!(writer, "{}", first);
+            write!(writer, "{}", first)?;
             while let Some(item) = self.iter.next() {
-                let _ = write!(writer, "{}{}", self.sep, item);
+                write!(writer, "{}{}", self.sep, item)?;
             }
         }
+        Ok(())
+    }
+
+    /// Consumes the backing iterator of a [`StringJoiner`] and writes the joined elements into a [`std::io::Write`].
+    pub fn write_io<W: std::io::Write>(mut self, mut writer: W) -> std::io::Result<()> {
+        if let Some(first) = self.iter.next() {
+            write!(writer, "{}", first)?;
+            while let Some(item) = self.iter.next() {
+                write!(writer, "{}{}", self.sep, item)?;
+            }
+        }
+        Ok(())
     }
 }
 
