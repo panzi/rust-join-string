@@ -1,4 +1,4 @@
-use join_string::{Join, Joiner};
+use join_string::{Join, Joiner, join};
 
 #[test]
 fn basic() {
@@ -34,6 +34,18 @@ fn types() {
             "".chars().join("bla")
         ].iter().join("ab".chars().join(',')).into_string(),
         "a,b");
+}
+
+#[test]
+fn joinable() {
+    assert_eq!(join(["foo", "bar", "baz"].as_slice(), ", ").into_string(), "foo, bar, baz");
+    let mut iter = ["foo", "bar", "baz"].iter();
+    assert_eq!(join(&mut iter, ", ").into_string(), "foo, bar, baz");
+    assert_eq!(join(["foo", "bar", "baz"].iter(), ", ").into_string(), "foo, bar, baz");
+    assert_eq!(join(["foo", "bar", "baz"].iter().rev(), ", ").into_string(), "baz, bar, foo");
+    assert_eq!(join(&["foo", "bar", "baz"], ", ").into_string(), "foo, bar, baz");
+    assert_eq!(join(vec!["foo", "bar", "baz"].as_slice(), ", ").into_string(), "foo, bar, baz");
+    assert_eq!(join(&vec!["foo", "bar", "baz"], ", ").into_string(), "foo, bar, baz");
 }
 
 #[test]
