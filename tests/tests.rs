@@ -20,6 +20,11 @@ fn types() {
         &Box::new("foo"), &"bar", &'z', &"bla".to_owned()
     ];
     assert_eq!(items.iter().join(", ").into_string(), "foo, bar, z, bla");
+    assert_eq!([
+            "".chars().join(""),
+            "".chars().join("bla")
+        ].iter().join("ab".chars().join(',')).into_string(),
+        "a,b");
 }
 
 #[test]
