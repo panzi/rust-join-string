@@ -16,6 +16,11 @@ impl<I, S> StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<str>, I::It
         return buffer;
     }
 
+    #[inline]
+    pub fn to_string(&self) -> String where I: Clone {
+        return format!("{}", self);
+    }
+
     pub fn write_into<W: std::fmt::Write>(mut self, buffer: &mut W) {
         if let Some(first) = self.iter.next() {
             let _ = write!(buffer, "{}", first);
@@ -23,6 +28,23 @@ impl<I, S> StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<str>, I::It
             while let Some(item) = self.iter.next() {
                 let _ = write!(buffer, "{}{}", delim, item);
             }
+        }
+    }
+}
+
+impl<I, S> Into<String> for StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<str>, I::Item: std::fmt::Display {
+    #[inline]
+    fn into(self) -> String {
+        self.into_string()
+    }
+}
+
+impl<I, S> Clone for StringJoiner<I, S> where I: std::iter::Iterator, S: AsRef<str>, I::Item: std::fmt::Display, I: Clone, S: Clone {
+    #[inline]
+    fn clone(&self) -> Self {
+        StringJoiner {
+            iter: self.iter.clone(),
+            delim: self.delim.clone()
         }
     }
 }
