@@ -1,6 +1,10 @@
 join-string
 ===========
 
+[![Build status](https://img.shields.io/github/actions/workflow/status/panzi/rust-join-string/test.yml?branch=main)](https://github.com/panzi/rust-join-string/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/panzi/rust-join-string)](https://github.com/panzi/rust-join-string/releases)
+[![License](https://img.shields.io/github/license/panzi/rust-join-string)](https://github.com/panzi/rust-join-string/blob/main/LICENSE)
+
 A simple crate to join the elements of iterators, interspersing a separator between all elements.
 
 This is done somewhat efficiently, if possible, meaning if the iterator is cheaply clonable you can
