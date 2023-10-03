@@ -319,7 +319,8 @@ impl<I> Clone for DisplayIter<I> where I: std::iter::Iterator, I: Clone {
 /// );
 /// ```
 #[inline]
-pub fn join<I, S>(elements: impl Join<I>, sep: S) -> Joiner<I, S> where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
+pub fn join<I, S>(elements: impl Join<I>, sep: S) -> Joiner<I, S>
+where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
     elements.join(sep)
 }
 
@@ -362,5 +363,5 @@ pub fn join<I, S>(elements: impl Join<I>, sep: S) -> Joiner<I, S> where I: std::
 #[inline]
 pub fn join_str<I, S>(elements: impl Join<I>, sep: S) -> Joiner<impl std::iter::Iterator<Item = impl std::fmt::Display>, impl std::fmt::Display>
 where I: std::iter::Iterator, I::Item: AsRef<str>, S: AsRef<str> {
-    DisplayIter::new(elements.iter()).join(DisplayWrapper (sep))
+    DisplayIter::new(elements).join(DisplayWrapper (sep))
 }
