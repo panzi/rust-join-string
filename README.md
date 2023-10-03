@@ -27,4 +27,4 @@ println!("{}",
 Note that the standard library already provides a similar [`Join`](https://doc.rust-lang.org/std/slice/trait.Join.html)
 trait on slices, but not on interators, and the standard library version always directly returns a
 new `String`. And then there are multiple other similar crates that however work a bit differently,
-e.g. having more restrictions on element and separator types or always returning a [`String`].
+e.g. having more restrictions on element and separator types or always returning a `String`.
