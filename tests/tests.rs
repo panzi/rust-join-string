@@ -26,16 +26,17 @@ fn join_sep_as_ref_str(elements: &[impl std::fmt::Display], sep: impl AsRef<str>
 fn types() {
     assert_eq!(['a', 'b', 'c'].iter().join(", ".to_owned()).to_string(), "a, b, c");
     assert_eq!([1, 2, 3].iter().join("").into_string(), "123");
+    assert_eq!(Join::join(&[1.0, 2.0, 3.0], ", ").into_string(), "1, 2, 3");
     assert_eq!([
             "foo".to_owned(),
             "bar".to_owned(),
             "baz".to_owned()
-        ].iter().join(", ").into_string(),
+        ].join(", ").into_string(),
         "foo, bar, baz");
     assert_eq!(vec![
             format_args!("{:02}", 1),
             format_args!("{:.1} {}", 3.0, 4)
-        ].iter().join(' ').into_string(),
+        ].join(' ').into_string(),
         "01 3.0 4");
     let items: [&dyn std::fmt::Display; 4] = [
         &Box::new("foo"), &"bar", &'z', &"bla".to_owned()
@@ -49,6 +50,14 @@ fn types() {
     assert_eq!(join_as_ref_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
     assert_eq!(join_map_as_ref_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
     assert_eq!(join_sep_as_ref_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
+
+    let mut set = std::collections::BTreeSet::new();
+    set.insert("foo");
+    set.insert("bar");
+    set.insert("baz");
+    assert_eq!(set.iter().join(", ").into_string(), "bar, baz, foo");
+
+    assert_eq!(Some("foo").iter().join(", ").into_string(), "foo");
 }
 
 #[test]
