@@ -1,4 +1,4 @@
-//! A simple crate to join the elements of iterators, interspercing a separator between all elements.
+//! A simple crate to join the elements of iterators, interspersing a separator between all elements.
 //! 
 //! This is done somewhat efficiently, if possible, meaning if the iterator is cheaply clonable you can
 //! directly print the result of [`Join::join()`] without creating a temporary [`String`] in memory.
@@ -95,7 +95,7 @@ impl<I, S> std::fmt::Display for Joiner<I, S> where I: std::iter::Iterator, S: s
 //      trait Join
 // =============================================================================
 
-/// Trait that provides a method to join elements of an iterator, interspercing
+/// Trait that provides a method to join elements of an iterator, interspersing
 /// a separator between all elements.
 /// 
 /// It is also implemented for a few common types that aren't iterators, but

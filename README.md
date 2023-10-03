@@ -1,7 +1,7 @@
 join-string
 ===========
 
-A simple crate to join the elements of iterators, interspercing a separator between all elements.
+A simple crate to join the elements of iterators, interspersing a separator between all elements.
 
 This is done somewhat efficiently, if possible, meaning if the iterator is cheaply clonable you can
 directly print the result of `Join::join()` without creating a temporary `String` in memory.
