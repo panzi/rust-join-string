@@ -99,7 +99,8 @@ impl<I, S> std::fmt::Display for Joiner<I, S> where I: std::iter::Iterator, S: s
 pub trait Join<I: std::iter::Iterator> {
     fn iter(self) -> I;
 
-    fn join<S>(self, sep: S) -> Joiner<I, S> where Self: Sized, S: std::fmt::Display, I::Item: std::fmt::Display {
+    fn join<S>(self, sep: S) -> Joiner<I, S>
+    where Self: Sized, S: std::fmt::Display, I::Item: std::fmt::Display {
         Joiner {
             iter: self.iter(),
             sep
@@ -210,7 +211,7 @@ impl<T> Clone for DisplayWrapper<T> where T: AsRef<str>, T: Clone {
 /// ```
 #[inline]
 pub fn join<I, S>(elements: impl Join<I>, sep: S) -> Joiner<I, S> where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
-    elements.iter().join(sep)
+    elements.join(sep)
 }
 
 /// Join anything that implements [`Join`], not just iterators when elements
