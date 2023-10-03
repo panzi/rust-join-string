@@ -60,14 +60,16 @@ impl<I, S> Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::I
     }
 }
 
-impl<I, S> From<Joiner<I, S>> for String where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+impl<I, S> From<Joiner<I, S>> for String
+where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
     #[inline]
     fn from(value: Joiner<I, S>) -> Self {
         value.into_string()
     }
 }
 
-impl<I, S> Clone for Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, I: Clone, S: Clone {
+impl<I, S> Clone for Joiner<I, S>
+where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, I: Clone, S: Clone {
     #[inline]
     fn clone(&self) -> Self {
         Joiner {
@@ -77,7 +79,8 @@ impl<I, S> Clone for Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Dis
     }
 }
 
-impl<I, S> std::fmt::Display for Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, I: Clone {
+impl<I, S> std::fmt::Display for Joiner<I, S>
+where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, I: Clone {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut iter = self.iter.clone();
         if let Some(first) = iter.next() {
@@ -108,6 +111,14 @@ pub trait Join<I: std::iter::Iterator> {
         Joiner {
             iter: self.iter(),
             sep
+        }
+    }
+
+    fn join_str<S>(self, sep: S) -> Joiner<DisplayIter<I>, DisplayWrapper<S>>
+    where Self: Sized, S: AsRef<str>, I::Item: AsRef<str> {
+        Joiner {
+            iter: DisplayIter { iter: self.iter() },
+            sep: DisplayWrapper (sep)
         }
     }
 }
@@ -154,13 +165,6 @@ impl<T: AsRef<str>> DisplayWrapper<T> {
     pub fn new(value: T) -> Self {
         Self (value)
     }
-
-    /// Map an iterable of [`AsRef<str>`] elements to an iterator of [`std::fmt::Display`] elements.
-    #[inline]
-    pub fn map<I>(elements: impl Join<I>) -> impl std::iter::Iterator<Item = impl std::fmt::Display>
-    where I: std::iter::Iterator<Item = T> {
-        elements.iter().map(|item| Self (item))
-    }
 }
 
 impl<T> std::fmt::Display for DisplayWrapper<T> where T: AsRef<str> {
@@ -174,6 +178,107 @@ impl<T> Clone for DisplayWrapper<T> where T: AsRef<str>, T: Clone {
     #[inline]
     fn clone(&self) -> Self {
         Self (self.0.clone())
+    }
+}
+
+// =============================================================================
+//      struct DisplayIter
+// =============================================================================
+
+/// Iterator-facade that maps an iterator over [`AsRef<str>`] to an iterator
+/// over [`DisplayWrapper`].
+/// 
+/// This is used to implement [`Join::join_str()`].
+#[derive(Debug)]
+pub struct DisplayIter<I>
+where I: std::iter::Iterator {
+    iter: I
+}
+
+impl<I> DisplayIter<I> where I: std::iter::Iterator {
+    #[inline]
+    pub fn new(elements: impl Join<I>) -> Self {
+        Self { iter: elements.iter() }
+    }
+}
+
+impl<I> std::iter::Iterator for DisplayIter<I>
+where I: std::iter::Iterator, I::Item: AsRef<str> {
+    type Item = DisplayWrapper<I::Item>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(item) = self.iter.next() {
+            return Some(DisplayWrapper (item));
+        }
+        None
+    }
+
+    #[inline]
+    fn last(self) -> Option<Self::Item>
+    where Self: Sized {
+        if let Some(item) = self.iter.last() {
+            return Some(DisplayWrapper (item));
+        }
+        None
+    }
+
+    #[inline]
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        self.iter.nth(n).map(|item| DisplayWrapper (item))
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
+
+    #[inline]
+    #[cfg(target_feature = "iter_advance_by")]
+    fn advance_by(&mut self, n: usize) -> Result<(), NonZeroUsize> {
+        self.iter.advance_by(n)
+    }
+
+    #[cfg(target_feature = "trusted_random_access")]
+    #[inline]
+    unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
+    where Self: TrustedRandomAccessNoCoerce
+    {
+        DisplayWrapper (self.iter.__iterator_get_unchecked(idx))
+    }
+}
+
+impl<I> std::iter::DoubleEndedIterator for DisplayIter<I>
+where I: std::iter::DoubleEndedIterator, I::Item: AsRef<str> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if let Some(item) = self.iter.next_back() {
+            return Some(DisplayWrapper (item));
+        }
+        None
+    }
+
+    #[inline]
+    fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+        if let Some(item) = self.iter.nth_back(n) {
+            return Some(DisplayWrapper (item));
+        }
+        None
+    }
+
+    #[cfg(target_feature = "iter_advance_by")]
+    #[inline]
+    fn advance_back_by(&mut self, n: usize) -> Result<(), NonZeroUsize> {
+        self.iter.advance_back_by(n)
+    }
+}
+
+impl<I> Clone for DisplayIter<I> where I: std::iter::Iterator, I: Clone {
+    #[inline]
+    fn clone(&self) -> Self {
+        DisplayIter {
+            iter: self.iter.clone()
+        }
     }
 }
 
@@ -257,5 +362,5 @@ pub fn join<I, S>(elements: impl Join<I>, sep: S) -> Joiner<I, S> where I: std::
 #[inline]
 pub fn join_str<I, S>(elements: impl Join<I>, sep: S) -> Joiner<impl std::iter::Iterator<Item = impl std::fmt::Display>, impl std::fmt::Display>
 where I: std::iter::Iterator, I::Item: AsRef<str>, S: AsRef<str> {
-    DisplayWrapper::map(elements).join(DisplayWrapper (sep))
+    DisplayIter::new(elements.iter()).join(DisplayWrapper (sep))
 }

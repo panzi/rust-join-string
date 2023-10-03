@@ -1,4 +1,4 @@
-use join_string::{Join, Joiner, join, join_str, DisplayWrapper};
+use join_string::{Join, Joiner, join, join_str, DisplayWrapper, DisplayIter};
 
 #[test]
 fn basic() {
@@ -15,7 +15,7 @@ fn join_as_ref_str(elements: &[impl AsRef<str>], sep: impl AsRef<str>) -> String
 }
 
 fn join_map_as_ref_str(elements: &[impl AsRef<str>], sep: impl std::fmt::Display) -> String {
-    DisplayWrapper::map(elements).join(sep).into_string()
+    DisplayIter::new(elements).join(sep).into_string()
 }
 
 fn join_sep_as_ref_str(elements: &[impl std::fmt::Display], sep: impl AsRef<str>) -> String {
@@ -47,7 +47,6 @@ fn types() {
             "".chars().join("bla")
         ].iter().join("ab".chars().join(',')).into_string(),
         "a,b");
-    assert_eq!(join_as_ref_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
     assert_eq!(join_map_as_ref_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
     assert_eq!(join_sep_as_ref_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
 
@@ -58,6 +57,15 @@ fn types() {
     assert_eq!(set.iter().join(", ").into_string(), "bar, baz, foo");
 
     assert_eq!(Some("foo").iter().join(", ").into_string(), "foo");
+}
+
+#[test]
+fn test_join_str() {
+    assert_eq!(join_as_ref_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
+    assert_eq!(join_str(&["foo", "bar", "baz"], ", ").into_string(), "foo, bar, baz");
+    assert_eq!(join_str(["foo", "bar", "baz"].iter(), ", ").into_string(), "foo, bar, baz");
+    assert_eq!(["foo", "bar", "baz"].join_str(", ").into_string(), "foo, bar, baz");
+    assert_eq!(["foo", "bar", "baz"].iter().join_str(", ").into_string(), "foo, bar, baz");
 }
 
 #[test]
