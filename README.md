@@ -5,7 +5,7 @@ join-string
 [![Release](https://img.shields.io/github/v/release/panzi/rust-join-string)](https://github.com/panzi/rust-join-string/releases)
 [![License](https://img.shields.io/github/license/panzi/rust-join-string)](https://github.com/panzi/rust-join-string/blob/main/LICENSE)
 
-A simple crate to join the elements of iterators, interspersing a separator between all elements.
+A simple crate to join the elements of iterators as a string, interspersing a separator between all elements.
 
 This is done somewhat efficiently, if possible, meaning if the iterator is cheaply clonable you can
 directly print the result of `Join::join()` without creating a temporary `String` in memory.

@@ -3,6 +3,12 @@ name = "join-string"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+description = "Join the elements of iterators as a string, interspersing a separator between all elements."
+readme = "README.md"
+homepage = "https://github.com/panzi/rust-join-string"
+repository = "https://github.com/panzi/rust-join-string"
+keywords = ["string"]
+categories = ["value-formatting"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
