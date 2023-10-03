@@ -93,6 +93,13 @@ fn into_impl() {
 }
 
 #[test]
+fn from_impl() {
+    let str = String::from([1, 2, 3].iter().join(" + "));
+    assert_eq!(str, "1 + 2 + 3");
+    assert_eq!(String::from("äüö".chars().join(' ')), "ä ü ö");
+}
+
+#[test]
 fn display_impl() {
     assert_eq!(format!("<{}>", ["foo", "bar", "baz"].iter().join(", ")), "<foo, bar, baz>");
     assert_eq!(format!("<{}>", [1, 2, 3].iter().cycle().take(5).join(", ")), "<1, 2, 3, 1, 2>");

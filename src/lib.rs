@@ -34,14 +34,14 @@ impl<I, S> Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::I
     pub fn into_string(self) -> String {
         let mut buffer = String::new();
         let _ = self.write_fmt(&mut buffer);
-        return buffer;
+        buffer
     }
 
     /// Consumes the backing iterator of a [`Joiner`] and writes the joined elements into a [`std::fmt::Write`].
     pub fn write_fmt<W: std::fmt::Write>(mut self, mut writer: W) -> std::fmt::Result {
         if let Some(first) = self.iter.next() {
             write!(writer, "{}", first)?;
-            while let Some(item) = self.iter.next() {
+            for item in self.iter {
                 write!(writer, "{}{}", self.sep, item)?;
             }
         }
@@ -52,7 +52,7 @@ impl<I, S> Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::I
     pub fn write_io<W: std::io::Write>(mut self, mut writer: W) -> std::io::Result<()> {
         if let Some(first) = self.iter.next() {
             write!(writer, "{}", first)?;
-            while let Some(item) = self.iter.next() {
+            for item in self.iter {
                 write!(writer, "{}{}", self.sep, item)?;
             }
         }
@@ -60,10 +60,10 @@ impl<I, S> Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::I
     }
 }
 
-impl<I, S> Into<String> for Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+impl<I, S> From<Joiner<I, S>> for String where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
     #[inline]
-    fn into(self) -> String {
-        self.into_string()
+    fn from(value: Joiner<I, S>) -> Self {
+        value.into_string()
     }
 }
 
@@ -82,7 +82,7 @@ impl<I, S> std::fmt::Display for Joiner<I, S> where I: std::iter::Iterator, S: s
         let mut iter = self.iter.clone();
         if let Some(first) = iter.next() {
             first.fmt(f)?;
-            while let Some(item) = iter.next() {
+            for item in iter {
                 self.sep.fmt(f)?;
                 item.fmt(f)?;
             }
