@@ -92,32 +92,32 @@ impl<I> Join<I> for I where I: std::iter::Iterator, I::Item: std::fmt::Display {
     }
 }
 
-pub trait Joinable<I: std::iter::Iterator> {
+pub trait Iterable<I: std::iter::Iterator> {
     fn iter(self) -> I;
 }
 
-impl<I> Joinable<I> for I where I: std::iter::Iterator {
+impl<I> Iterable<I> for I where I: std::iter::Iterator {
     #[inline]
     fn iter(self) -> I {
         self
     }
 }
 
-impl<'a, T> Joinable<core::slice::Iter<'a, T>> for &'a [T] {
+impl<'a, T> Iterable<core::slice::Iter<'a, T>> for &'a [T] {
     #[inline]
     fn iter(self) -> core::slice::Iter<'a, T> {
         self.iter()
     }
 }
 
-impl<'a, T, const N: usize> Joinable<core::slice::Iter<'a, T>> for &'a [T; N] {
+impl<'a, T, const N: usize> Iterable<core::slice::Iter<'a, T>> for &'a [T; N] {
     #[inline]
     fn iter(self) -> core::slice::Iter<'a, T> {
         self.as_slice().iter()
     }
 }
 
-impl<'a, T> Joinable<core::slice::Iter<'a, T>> for &'a Vec<T> {
+impl<'a, T> Iterable<core::slice::Iter<'a, T>> for &'a Vec<T> {
     #[inline]
     fn iter(self) -> core::slice::Iter<'a, T> {
         self.as_slice().iter()
@@ -140,8 +140,46 @@ impl<'a, T> Joinable<core::slice::Iter<'a, T>> for &'a Vec<T> {
 /// assert_eq!(join(["foo", "bar", "baz"].iter().rev(), ", ").into_string(), "baz, bar, foo");
 /// ```
 #[inline]
-pub fn join<I, S>(elements: impl Joinable<I>, sep: S) -> Joiner<I, S> where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
+pub fn join<I, S>(elements: impl Iterable<I>, sep: S) -> Joiner<I, S> where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
     elements.iter().join(sep)
+}
+
+
+#[repr(transparent)]
+#[derive(Debug)]
+pub struct DisplayWrapper<T: AsRef<str>> ( T );
+
+impl<T: AsRef<str>> DisplayWrapper<T> {
+    #[inline]
+    pub fn new(item: T) -> Self {
+        Self (item)
+    }
+
+    #[inline]
+    pub fn map<I>(elements: impl Iterable<I>) -> impl std::iter::Iterator<Item = impl std::fmt::Display>
+    where I: std::iter::Iterator<Item = T> {
+        elements.iter().map(|item| Self (item))
+    }
+}
+
+impl<T> std::fmt::Display for DisplayWrapper<T> where T: AsRef<str> {
+    #[inline]
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.as_ref().fmt(f)
+    }
+}
+
+impl<T> Clone for DisplayWrapper<T> where T: AsRef<str>, T: Clone {
+    #[inline]
+    fn clone(&self) -> Self {
+        Self (self.0.clone())
+    }
+}
+
+#[inline]
+pub fn join_str<I, S>(elements: impl Iterable<I>, sep: S) -> Joiner<impl std::iter::Iterator<Item = impl std::fmt::Display>, impl std::fmt::Display>
+where I: std::iter::Iterator, I::Item: AsRef<str>, S: AsRef<str> {
+    DisplayWrapper::map(elements).join(DisplayWrapper (sep))
 }
 
 impl<'a, T> Join<core::slice::Iter<'a, T>> for &'a [T] where T: std::fmt::Display {
