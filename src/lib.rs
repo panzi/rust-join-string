@@ -95,7 +95,11 @@ impl<I, S> std::fmt::Display for Joiner<I, S> where I: std::iter::Iterator, S: s
 //      trait Join
 // =============================================================================
 
-/// Helper trait to handle iterators, slices, arrays, and [`Vec`]s.
+/// Trait that provides a method to join elements of an iterator, interspercing
+/// a separator between all elements.
+/// 
+/// It is also implemented for a few common types that aren't iterators, but
+/// have an `iter()` method. Among these types are arrays, slices, and [`Vec`]s.
 pub trait Join<I: std::iter::Iterator> {
     fn iter(self) -> I;
 
