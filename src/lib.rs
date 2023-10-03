@@ -104,8 +104,16 @@ where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, 
 /// It is also implemented for a few common types that aren't iterators, but
 /// have an `iter()` method. Among these types are arrays, slices, and [`Vec`]s.
 pub trait Join<I: std::iter::Iterator> {
+    /// Get an iterator.
+    /// 
+    /// This trait can be implemented on types other than iterators as long
+    /// there is a way to get an iterator to it with this method.
     fn iter(self) -> I;
 
+    /// Join the elements of an iterator, interspersing a separator between
+    /// all elements.
+    /// 
+    /// The elements and the separator need to implement [`std::fmt::Display`].
     fn join<S>(self, sep: S) -> Joiner<I, S>
     where Self: Sized, S: std::fmt::Display, I::Item: std::fmt::Display {
         Joiner {
@@ -114,6 +122,10 @@ pub trait Join<I: std::iter::Iterator> {
         }
     }
 
+    /// Join the elements of an iterator, interspersing a separator between
+    /// all elements.
+    /// 
+    /// The elements and the separator need to implement [`AsRef<str>`].
     fn join_str<S>(self, sep: S) -> Joiner<DisplayIter<I>, DisplayWrapper<S>>
     where Self: Sized, S: AsRef<str>, I::Item: AsRef<str> {
         Joiner {
