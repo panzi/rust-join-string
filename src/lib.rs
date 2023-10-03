@@ -124,37 +124,55 @@ impl<'a, T> Iterable<core::slice::Iter<'a, T>> for &'a Vec<T> {
     }
 }
 
-/// Join anything that implements [`Joinable`], not just iterators.
+/// Join anything that implements [`Iterable`], not just iterators.
+/// The elements need to implement [`std::fmt::Display`].
 /// 
 /// You can pass iterators, slices, and borrows of arrays and [`Vec`]s:
 /// 
 /// ```
 /// use join_string::join;
 /// 
-/// assert_eq!(join(&["foo", "bar", "baz"], ", ").into_string(), "foo, bar, baz");
+/// assert_eq!(
+///     join(&["foo", "bar", "baz"], ", ").into_string(),
+///     "foo, bar, baz"
+/// );
 /// 
-/// assert_eq!(join(["foo", "bar", "baz"].as_slice(), ", ").into_string(), "foo, bar, baz");
+/// assert_eq!(
+///     join([1, 2, 3].as_slice(), ", ").into_string(),
+///     "1, 2, 3"
+/// );
 /// 
-/// assert_eq!(join(&vec!["foo", "bar", "baz"], ", ").into_string(), "foo, bar, baz");
+/// assert_eq!(
+///     join(&vec!['a', 'b', 'c'], ", ").into_string(),
+///     "a, b, c"
+/// );
 /// 
-/// assert_eq!(join(["foo", "bar", "baz"].iter().rev(), ", ").into_string(), "baz, bar, foo");
+/// assert_eq!(
+///     join([
+///         "foo".to_owned(),
+///         "bar".to_owned(),
+///         "baz".to_owned()
+///     ].iter().rev(), ", ").into_string(),
+///     "baz, bar, foo"
+/// );
 /// ```
 #[inline]
 pub fn join<I, S>(elements: impl Iterable<I>, sep: S) -> Joiner<I, S> where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
     elements.iter().join(sep)
 }
 
-
+/// Helper for joining elements that only implement [`AsRef<str>`], but not [`std::fmt::Display`].
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct DisplayWrapper<T: AsRef<str>> ( T );
 
 impl<T: AsRef<str>> DisplayWrapper<T> {
     #[inline]
-    pub fn new(item: T) -> Self {
-        Self (item)
+    pub fn new(value: T) -> Self {
+        Self (value)
     }
 
+    /// Map an iterable of [`AsRef<str>`] elements to an iterator of [`std::fmt::Display`] elements.
     #[inline]
     pub fn map<I>(elements: impl Iterable<I>) -> impl std::iter::Iterator<Item = impl std::fmt::Display>
     where I: std::iter::Iterator<Item = T> {
@@ -176,6 +194,42 @@ impl<T> Clone for DisplayWrapper<T> where T: AsRef<str>, T: Clone {
     }
 }
 
+/// Join anything that implements [`Iterable`], not just iterators when elements
+/// don't implement [`std::fmt::Display`], but implement [`AsRef<str>`] instead.
+/// 
+/// You can pass iterators, slices, and borrows of arrays and [`Vec`]s:
+/// 
+/// ```
+/// use join_string::join_str;
+/// 
+/// assert_eq!(
+///     join_str(&["foo", "bar", "baz"], ", ").into_string(),
+///     "foo, bar, baz"
+/// );
+/// 
+/// assert_eq!(
+///     join_str([
+///         &"foo".to_owned(),
+///         &"bar".to_owned(),
+///         &"baz".to_owned()
+///     ].as_slice(), ", ").into_string(),
+///     "foo, bar, baz"
+/// );
+/// 
+/// assert_eq!(
+///     join_str(&vec!["foo", "bar", "baz"], ", ").into_string(),
+///     "foo, bar, baz"
+/// );
+/// 
+/// assert_eq!(
+///     join_str([
+///         "foo".to_owned(),
+///         "bar".to_owned(),
+///         "baz".to_owned()
+///     ].iter().rev(), ", ").into_string(),
+///     "baz, bar, foo"
+/// );
+/// ```
 #[inline]
 pub fn join_str<I, S>(elements: impl Iterable<I>, sep: S) -> Joiner<impl std::iter::Iterator<Item = impl std::fmt::Display>, impl std::fmt::Display>
 where I: std::iter::Iterator, I::Item: AsRef<str>, S: AsRef<str> {
