@@ -59,6 +59,15 @@ fn types() {
     assert_eq!(set.iter().join(", ").into_string(), "bar, baz, foo");
 
     assert_eq!(Some("foo").iter().join(", ").into_string(), "foo");
+    assert_eq!(Some("foo").join(", ").into_string(), "foo");
+
+    let ok: std::result::Result<&str, &str> = Ok("ok");
+    assert_eq!(ok.iter().join(", ").into_string(), "ok");
+    assert_eq!(ok.join(", ").into_string(), "ok");
+
+    let err: std::result::Result<&str, &str> = Err("err");
+    assert_eq!(err.iter().join(", ").into_string(), "");
+    assert_eq!(err.join(", ").into_string(), "");
 }
 
 #[test]
