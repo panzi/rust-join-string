@@ -72,7 +72,7 @@ impl<I, S> Clone for Joiner<I, S>
 where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, I: Clone, S: Clone {
     #[inline]
     fn clone(&self) -> Self {
-        Joiner {
+        Self {
             iter: self.iter.clone(),
             sep: self.sep.clone()
         }
