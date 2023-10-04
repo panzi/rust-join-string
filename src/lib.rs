@@ -204,8 +204,13 @@ where I: std::iter::Iterator, I::Item: AsRef<str> {
     }
 
     #[inline]
+    fn count(self) -> usize where Self: Sized {
+        self.iter.count()
+    }
+
+    #[inline]
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
-        self.iter.nth(n).map(|item| DisplayWrapper (item))
+        self.iter.nth(n).map(DisplayWrapper)
     }
 
     #[inline]
@@ -219,11 +224,10 @@ where I: std::iter::Iterator, I::Item: AsRef<str> {
         self.iter.advance_by(n)
     }
 
-    #[cfg(target_feature = "trusted_random_access")]
     #[inline]
+    #[cfg(target_feature = "trusted_random_access")]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
-    where Self: TrustedRandomAccessNoCoerce
-    {
+    where Self: TrustedRandomAccessNoCoerce {
         DisplayWrapper (self.iter.__iterator_get_unchecked(idx))
     }
 }
@@ -246,8 +250,8 @@ where I: std::iter::DoubleEndedIterator, I::Item: AsRef<str> {
         None
     }
 
-    #[cfg(target_feature = "iter_advance_by")]
     #[inline]
+    #[cfg(target_feature = "iter_advance_by")]
     fn advance_back_by(&mut self, n: usize) -> Result<(), NonZeroUsize> {
         self.iter.advance_back_by(n)
     }
@@ -256,7 +260,7 @@ where I: std::iter::DoubleEndedIterator, I::Item: AsRef<str> {
 impl<I> Clone for DisplayIter<I> where I: std::iter::Iterator, I: Clone {
     #[inline]
     fn clone(&self) -> Self {
-        DisplayIter {
+        Self {
             iter: self.iter.clone()
         }
     }
