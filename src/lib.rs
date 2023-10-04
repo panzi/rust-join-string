@@ -101,15 +101,9 @@ where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, 
 /// Trait that provides a method to join elements of an iterator, interspersing
 /// a separator between all elements.
 /// 
-/// It is also implemented for a few common types that aren't iterators, but
-/// have an `iter()` method. Among these types are arrays, slices, and [`Vec`]s.
-pub trait Join<I: std::iter::Iterator> {
-    /// Get an iterator for joining elements.
-    /// 
-    /// This trait can be implemented on types other than iterators as long as
-    /// there is a way to get an iterator.
-    fn join_iter(self) -> I;
-
+/// This trait is implemented for anything that implements
+/// [`std::iter::IntoIterator`], which is e.g. arrays, slices, [`Vec`], and more.
+pub trait Join<I: std::iter::Iterator>: std::iter::IntoIterator<IntoIter = I> {
     /// Join the elements of an iterator, interspersing a separator between
     /// all elements.
     /// 
@@ -117,7 +111,7 @@ pub trait Join<I: std::iter::Iterator> {
     fn join<S>(self, sep: S) -> Joiner<I, S>
     where Self: Sized, S: std::fmt::Display, I::Item: std::fmt::Display {
         Joiner {
-            iter: self.join_iter(),
+            iter: self.into_iter(),
             sep
         }
     }
@@ -129,18 +123,13 @@ pub trait Join<I: std::iter::Iterator> {
     fn join_str<S>(self, sep: S) -> Joiner<DisplayIter<I>, DisplayWrapper<S>>
     where Self: Sized, S: AsRef<str>, I::Item: AsRef<str> {
         Joiner {
-            iter: DisplayIter { iter: self.join_iter() },
+            iter: DisplayIter { iter: self.into_iter() },
             sep: DisplayWrapper (sep)
         }
     }
 }
 
-impl<T> Join<T::IntoIter> for T where T: std::iter::IntoIterator {
-    #[inline]
-    fn join_iter(self) -> T::IntoIter {
-        self.into_iter()
-    }
-}
+impl<T> Join<T::IntoIter> for T where T: std::iter::IntoIterator {}
 
 // =============================================================================
 //      struct DisplayWrapper
@@ -189,7 +178,7 @@ where I: std::iter::Iterator {
 impl<I> DisplayIter<I> where I: std::iter::Iterator {
     #[inline]
     pub fn new(elements: impl Join<I>) -> Self {
-        Self { iter: elements.join_iter() }
+        Self { iter: elements.into_iter() }
     }
 }
 
