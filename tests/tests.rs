@@ -3,7 +3,7 @@ use join_string::{Join, Joiner, join, join_str, DisplayWrapper, DisplayIter};
 #[test]
 fn basic() {
     let empty: [&str; 0] = [];
-    assert_eq!(empty.iter().join(", ").into_string(), "");
+    assert_eq!(empty.join(", ").into_string(), "");
     assert_eq!([""].iter().join(", ").into_string(), "");
     assert_eq!(["foo"].iter().join(", ").into_string(), "foo");
     assert_eq!(["", ""].iter().join(", ").into_string(), ", ");
@@ -25,7 +25,9 @@ fn join_sep_as_ref_str(elements: &[impl std::fmt::Display], sep: impl AsRef<str>
 #[test]
 fn types() {
     assert_eq!(['a', 'b', 'c'].iter().join(", ".to_owned()).to_string(), "a, b, c");
-    assert_eq!([1, 2, 3].iter().join("").into_string(), "123");
+    let array = [1, 2, 3];
+    assert_eq!(array.join("").into_string(), "123");
+    assert_eq!(array.join("").into_string(), "123"); // test that it's not moving the array
     assert_eq!(Join::join(&[1.0, 2.0, 3.0], ", ").into_string(), "1, 2, 3");
     assert_eq!([
             "foo".to_owned(),
@@ -73,7 +75,8 @@ fn joinable() {
     assert_eq!(join(["foo", "bar", "baz"].as_slice(), ", ").into_string(), "foo, bar, baz");
     let mut iter = ["foo", "bar", "baz"].iter();
     assert_eq!(join(&mut iter, ", ").into_string(), "foo, bar, baz");
-    assert_eq!(join(["foo", "bar", "baz"].iter(), ", ").into_string(), "foo, bar, baz");
+    assert_eq!(join(&mut iter, ", ").into_string(), ""); // iterator is consumed
+    assert_eq!(join(["foo", "bar", "baz"], ", ").into_string(), "foo, bar, baz");
     assert_eq!(join(["foo", "bar", "baz"].iter().rev(), ", ").into_string(), "baz, bar, foo");
     assert_eq!(join(&["foo", "bar", "baz"], ", ").into_string(), "foo, bar, baz");
     assert_eq!(join(vec!["foo", "bar", "baz"].as_slice(), ", ").into_string(), "foo, bar, baz");
@@ -95,14 +98,14 @@ fn complex_exprs() {
 
 #[test]
 fn into_impl() {
-    let str: String = [1, 2, 3].iter().join(" + ").into();
+    let str: String = [1, 2, 3].join(" + ").into();
     assert_eq!(str, "1 + 2 + 3");
     assert_eq!(<Joiner<_, _> as Into<String>>::into("äüö".chars().join(' ')), "ä ü ö");
 }
 
 #[test]
 fn from_impl() {
-    let str = String::from([1, 2, 3].iter().join(" + "));
+    let str = String::from([1, 2, 3].join(" + "));
     assert_eq!(str, "1 + 2 + 3");
     assert_eq!(String::from("äüö".chars().join(' ')), "ä ü ö");
 }

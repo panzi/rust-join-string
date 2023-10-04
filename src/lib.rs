@@ -104,11 +104,11 @@ where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, 
 /// It is also implemented for a few common types that aren't iterators, but
 /// have an `iter()` method. Among these types are arrays, slices, and [`Vec`]s.
 pub trait Join<I: std::iter::Iterator> {
-    /// Get an iterator.
+    /// Get an iterator for joining elements.
     /// 
-    /// This trait can be implemented on types other than iterators as long
-    /// there is a way to get an iterator to it with this method.
-    fn iter(self) -> I;
+    /// This trait can be implemented on types other than iterators as long as
+    /// there is a way to get an iterator.
+    fn join_iter(self) -> I;
 
     /// Join the elements of an iterator, interspersing a separator between
     /// all elements.
@@ -117,7 +117,7 @@ pub trait Join<I: std::iter::Iterator> {
     fn join<S>(self, sep: S) -> Joiner<I, S>
     where Self: Sized, S: std::fmt::Display, I::Item: std::fmt::Display {
         Joiner {
-            iter: self.iter(),
+            iter: self.join_iter(),
             sep
         }
     }
@@ -129,37 +129,16 @@ pub trait Join<I: std::iter::Iterator> {
     fn join_str<S>(self, sep: S) -> Joiner<DisplayIter<I>, DisplayWrapper<S>>
     where Self: Sized, S: AsRef<str>, I::Item: AsRef<str> {
         Joiner {
-            iter: DisplayIter { iter: self.iter() },
+            iter: DisplayIter { iter: self.join_iter() },
             sep: DisplayWrapper (sep)
         }
     }
 }
 
-impl<I> Join<I> for I where I: std::iter::Iterator {
+impl<T> Join<T::IntoIter> for T where T: std::iter::IntoIterator {
     #[inline]
-    fn iter(self) -> I {
-        self
-    }
-}
-
-impl<'a, T> Join<core::slice::Iter<'a, T>> for &'a [T] {
-    #[inline]
-    fn iter(self) -> core::slice::Iter<'a, T> {
-        self.iter()
-    }
-}
-
-impl<'a, T, const N: usize> Join<core::slice::Iter<'a, T>> for &'a [T; N] {
-    #[inline]
-    fn iter(self) -> core::slice::Iter<'a, T> {
-        self.as_slice().iter()
-    }
-}
-
-impl<'a, T> Join<core::slice::Iter<'a, T>> for &'a Vec<T> {
-    #[inline]
-    fn iter(self) -> core::slice::Iter<'a, T> {
-        self.as_slice().iter()
+    fn join_iter(self) -> T::IntoIter {
+        self.into_iter()
     }
 }
 
@@ -210,7 +189,7 @@ where I: std::iter::Iterator {
 impl<I> DisplayIter<I> where I: std::iter::Iterator {
     #[inline]
     pub fn new(elements: impl Join<I>) -> Self {
-        Self { iter: elements.iter() }
+        Self { iter: elements.join_iter() }
     }
 }
 
