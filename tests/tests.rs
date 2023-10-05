@@ -142,3 +142,62 @@ fn write_io() -> std::io::Result<()> {
 
     Ok(())
 }
+
+#[derive(Debug)]
+struct MyItem (String);
+
+impl std::fmt::Display for MyItem {
+    #[inline]
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+
+struct MyContainer {
+    items: Vec<MyItem>
+}
+
+impl std::iter::IntoIterator for MyContainer {
+    type Item = MyItem;
+    type IntoIter = <Vec<MyItem> as std::iter::IntoIterator>::IntoIter;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.items.into_iter()
+    }
+}
+
+#[test]
+fn custom_impl() {
+    let cont = MyContainer {
+        items: vec![
+            MyItem ("foo".to_string()),
+            MyItem ("bar".to_string()),
+            MyItem ("baz".to_string()),
+        ]
+    };
+
+    assert_eq!(cont.join(", ").into_string(), "foo, bar, baz");
+}
+
+struct MyOtherContainer {
+    items: Vec<MyItem>
+}
+
+fn my_join<'a, S>(cont: &'a MyOtherContainer, sep: S) -> Joiner<std::slice::Iter<'a, MyItem>, S> where S: std::fmt::Display {
+    Joiner::new(cont.items.iter(), sep)
+}
+
+#[test]
+fn joiner_new() {
+    let cont = MyOtherContainer {
+        items: vec![
+            MyItem ("foo".to_string()),
+            MyItem ("bar".to_string()),
+            MyItem ("baz".to_string()),
+        ]
+    };
+
+    assert_eq!(my_join(&cont, ", ").into_string(), "foo, bar, baz");
+}

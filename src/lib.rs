@@ -29,6 +29,17 @@ pub struct Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display {
 }
 
 impl<I, S> Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+    /// Create a [`Joiner`] object.
+    /// 
+    /// You can use this when implementing your own `join()` function.
+    #[inline]
+    pub fn new(iter: I, sep: S) -> Self {
+        Self {
+            iter,
+            sep
+        }
+    }
+
     /// Consumes the backing iterator of a [`Joiner`] and returns the joined elements as a new [`String`].
     #[inline]
     pub fn into_string(self) -> String {
