@@ -185,8 +185,11 @@ struct MyOtherContainer {
     items: Vec<MyItem>
 }
 
-fn my_join<'a, S>(cont: &'a MyOtherContainer, sep: S) -> Joiner<std::slice::Iter<'a, MyItem>, S> where S: std::fmt::Display {
-    Joiner::new(cont.items.iter(), sep)
+impl MyOtherContainer {
+    #[inline]
+    fn join<'a, S>(&'a self, sep: S) -> Joiner<std::slice::Iter<'a, MyItem>, S> where S: std::fmt::Display {
+        Joiner::new(self.items.iter(), sep)
+    }
 }
 
 #[test]
@@ -199,5 +202,5 @@ fn joiner_new() {
         ]
     };
 
-    assert_eq!(my_join(&cont, ", ").into_string(), "foo, bar, baz");
+    assert_eq!(cont.join(", ").into_string(), "foo, bar, baz");
 }
