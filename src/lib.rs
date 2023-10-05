@@ -243,6 +243,20 @@ where I: std::iter::Iterator, I::Item: AsRef<str> {
     }
 }
 
+impl<I> std::iter::ExactSizeIterator for DisplayIter<I>
+where I: std::iter::ExactSizeIterator, I::Item: AsRef<str> {
+    #[inline]
+    fn len(&self) -> usize {
+        self.iter.len()
+    }
+
+    #[inline]
+    #[cfg(target_feature = "exact_size_is_empty")]
+    fn is_empty(&self) -> bool {
+        self.iter.is_empty()
+    }
+}
+
 impl<I> std::iter::DoubleEndedIterator for DisplayIter<I>
 where I: std::iter::DoubleEndedIterator, I::Item: AsRef<str> {
     #[inline]
