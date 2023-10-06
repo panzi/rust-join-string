@@ -30,13 +30,23 @@
 //! [`std::fmt::Write`] even if the backing iterator doesn't implement
 //! [`Clone`](https://doc.rust-lang.org/std/clone/trait.Clone.html).
 //! 
-//! ```Rust
-//! use join_string::Join;
-//! 
+//! ```
+//! # use join_string::Join;
+//! #
+//! # fn main() -> std::io::Result<()> {
 //! ["foo", "bar", "baz"].join(", ").write_io(std::io::stdout())?;
+//! # Ok(())
+//! # }
+//! ```
 //! 
+//! ```
+//! # use join_string::Join;
+//! #
+//! # fn main() -> std::fmt::Result {
 //! let mut str = String::new();
 //! ["foo", "bar", "baz"].join(", ").write_fmt(&mut str)?;
+//! # Ok(())
+//! # }
 //! ```
 //! 
 //! # Notes
