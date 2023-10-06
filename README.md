@@ -15,7 +15,7 @@ clonable you can directly print the result of `Join::join()` without creating a 
 [`std::iter::IntoIterator`](https://doc.rust-lang.org/std/iter/trait.IntoIterator.html),
 meaning on all iterators and collections. The elements and the separator need to implement
 [`std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html). Alternatively
-a `Join::join_str()` method can be used to join elements that only implement
+the `Join::join_str()` method can be used to join elements that only implement
 [`AsRef<str>`](https://doc.rust-lang.org/std/convert/trait.AsRef.html).
 
 ```Rust
@@ -34,8 +34,8 @@ println!("{}",
 
 You can also write the result more directly to a
 [`std::io::Write`](https://doc.rust-lang.org/std/io/trait.Write.html) or
-[`std::fmt::Write`](https://doc.rust-lang.org/std/fmt/trait.Write.html),
-then even if the backing iterator doesn't implement
+[`std::fmt::Write`](https://doc.rust-lang.org/std/fmt/trait.Write.html)
+even if the backing iterator doesn't implement
 [`Clone`](https://doc.rust-lang.org/std/clone/trait.Clone.html).
 
 ```Rust
@@ -47,7 +47,8 @@ let mut str = String::new();
 ["foo", "bar", "baz"].join(", ").write_fmt(&mut str)?;
 ```
 
-Note that the standard library already provides a similar [`std::slice::Join`](https://doc.rust-lang.org/std/slice/trait.Join.html)
-trait on slices, but not on interators, and the standard library version always directly returns a
-new `String`. And then there are multiple other similar crates that however work a bit differently,
+Note that the standard library already provides a similar
+[`std::slice::Join`](https://doc.rust-lang.org/std/slice/trait.Join.html)
+trait on slices, but not on iterators, and the standard library version always directly returns a
+new `String`. Further there are multiple other similar crates that however work a bit differently,
 e.g. having more restrictions on element and separator types or always returning a `String`.

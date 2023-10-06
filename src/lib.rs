@@ -1,8 +1,17 @@
-//! A simple crate to join the elements of iterators, interspersing a separator between all elements.
+//! A simple crate to join elements as a string, interspersing a separator between
+//! all elements.
 //! 
-//! This is done somewhat efficiently, if possible, meaning if the iterator is cheaply clonable you can
-//! directly print the result of [`Join::join()`] without creating a temporary [`String`] in memory.
-//!
+//! This is done somewhat efficiently, if possible. Meaning if the iterator is
+//! cheaply clonable you can directly print the result of [`Join::join()`]
+//! without creating a temporary [`String`] in memory. The [`Join::join()`]
+//! method will appear on anything that implements [`std::iter::IntoIterator`],
+//! meaning on all iterators and collections. The elements and the separator
+//! need to implement [`std::fmt::Display`]. Alternatively the
+//! [`Join::join_str()`] method can be used to join elements that only
+//! implement [`AsRef<str>`].
+//! 
+//! # Examples
+//! 
 //! ```
 //! use join_string::Join;
 //! 
@@ -16,6 +25,28 @@
 //!         .join(' '));
 //! // Output: oof rab zab
 //! ```
+//! 
+//! You can also write the result more directly to a [`std::io::Write`] or
+//! [`std::fmt::Write`] even if the backing iterator doesn't implement
+//! [`Clone`](https://doc.rust-lang.org/std/clone/trait.Clone.html).
+//! 
+//! ```Rust
+//! use join_string::Join;
+//! 
+//! ["foo", "bar", "baz"].join(", ").write_io(std::io::stdout())?;
+//! 
+//! let mut str = String::new();
+//! ["foo", "bar", "baz"].join(", ").write_fmt(&mut str)?;
+//! ```
+//! 
+//! # Notes
+//! 
+//! The standard library already provides a similar [`std::slice::Join`]
+//! trait on slices, but not on iterators, and the standard library version
+//! always directly returns a new [`String`]. Further there are multiple
+//! other similar crates that however work a bit differently, e.g. having
+//! more restrictions on element and separator types or always returning a
+//! [`String`].
 
 // =============================================================================
 //      struct Joiner
@@ -295,10 +326,10 @@ impl<I> Clone for DisplayIter<I> where I: std::iter::Iterator, I: Clone {
 //      functions
 // =============================================================================
 
-/// Join anything that implements [`Join`], not just iterators.
-/// The elements need to implement [`std::fmt::Display`].
+/// Join anything that implements [`Join`]. The elements need to implement
+/// [`std::fmt::Display`].
 /// 
-/// You can pass iterators, slices, and borrows of arrays and [`Vec`]s:
+/// # Examples
 /// 
 /// ```
 /// use join_string::join;
@@ -333,10 +364,10 @@ where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
     elements.join(sep)
 }
 
-/// Join anything that implements [`Join`], not just iterators when elements
-/// don't implement [`std::fmt::Display`], but implement [`AsRef<str>`] instead.
+/// Join anything that implements [`Join`] when elements don't implement
+/// [`std::fmt::Display`], but implement [`AsRef<str>`] instead.
 /// 
-/// You can pass iterators, slices, and borrows of arrays and [`Vec`]s:
+/// # Examples
 /// 
 /// ```
 /// use join_string::join_str;
