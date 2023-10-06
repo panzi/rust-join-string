@@ -18,6 +18,9 @@ meaning on all iterators and collections. The elements and the separator need to
 the `Join::join_str()` method can be used to join elements that only implement
 [`AsRef<str>`](https://doc.rust-lang.org/std/convert/trait.AsRef.html).
 
+Examples
+--------
+
 ```Rust
 use join_string::Join;
 
@@ -47,7 +50,10 @@ let mut str = String::new();
 ["foo", "bar", "baz"].join(", ").write_fmt(&mut str)?;
 ```
 
-Note that the standard library already provides a similar
+Notes
+-----
+
+The standard library already provides a similar
 [`std::slice::Join`](https://doc.rust-lang.org/std/slice/trait.Join.html)
 trait on slices, but not on iterators, and the standard library version always directly returns a
 new `String`. Further there are multiple other similar crates that however work a bit differently,
