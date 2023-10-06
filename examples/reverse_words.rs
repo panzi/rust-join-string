@@ -26,7 +26,7 @@ fn main() {
             .map(|s| s
                 .chars()
                 .rev()
-                .map(|c| char::from_u32(c as u32 + 1u32).unwrap_or('?'))
+                .map(|c| char::from_u32(c as u32 + 1).unwrap_or('?'))
                 .join(""))
             .join(" ")
     );
