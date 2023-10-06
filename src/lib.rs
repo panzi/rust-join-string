@@ -1,6 +1,6 @@
 //! A simple crate to join elements as a string, interspersing a separator between
 //! all elements.
-//! 
+//!
 //! This is done somewhat efficiently, if possible. Meaning if the iterator is
 //! cheaply clonable you can directly print the result of [`Join::join()`]
 //! without creating a temporary [`String`] in memory. The [`Join::join()`]
@@ -9,27 +9,27 @@
 //! need to implement [`std::fmt::Display`]. Alternatively the
 //! [`Join::join_str()`] method can be used to join elements that only
 //! implement [`AsRef<str>`].
-//! 
+//!
 //! # Examples
-//! 
+//!
 //! ```
 //! use join_string::Join;
-//! 
+//!
 //! assert_eq!(
 //!     "foo bar baz".split_whitespace().join(", ").into_string(),
 //!     "foo, bar, baz");
-//! 
+//!
 //! println!("{}",
 //!     "foo bar baz".split_whitespace()
 //!         .map(|s| s.chars().rev().join(""))
 //!         .join(' '));
 //! // Output: oof rab zab
 //! ```
-//! 
+//!
 //! You can also write the result more directly to a [`std::io::Write`] or
 //! [`std::fmt::Write`] even if the backing iterator doesn't implement
 //! [`Clone`](https://doc.rust-lang.org/std/clone/trait.Clone.html).
-//! 
+//!
 //! ```
 //! # use join_string::Join;
 //! #
@@ -38,7 +38,7 @@
 //! # Ok(())
 //! # }
 //! ```
-//! 
+//!
 //! ```
 //! # use join_string::Join;
 //! #
@@ -48,9 +48,9 @@
 //! # Ok(())
 //! # }
 //! ```
-//! 
+//!
 //! # Notes
-//! 
+//!
 //! The standard library already provides a similar [`std::slice::Join`]
 //! trait on slices, but not on iterators, and the standard library version
 //! always directly returns a new [`String`]. Further there are multiple
@@ -64,21 +64,27 @@
 
 /// Helper struct that captures the iterator and separator for later joining.
 #[derive(Debug)]
-pub struct Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display {
+pub struct Joiner<I, S>
+where
+    I: std::iter::Iterator,
+    S: std::fmt::Display,
+{
     iter: I,
-    sep: S
+    sep: S,
 }
 
-impl<I, S> Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+impl<I, S> Joiner<I, S>
+where
+    I: std::iter::Iterator,
+    S: std::fmt::Display,
+    I::Item: std::fmt::Display,
+{
     /// Create a [`Joiner`] object.
-    /// 
+    ///
     /// You can use this when implementing your own `join()` function.
     #[inline]
     pub fn new(iter: I, sep: S) -> Self {
-        Self {
-            iter,
-            sep
-        }
+        Self { iter, sep }
     }
 
     /// Consumes the backing iterator of a [`Joiner`] and returns the joined elements as a new [`String`].
@@ -113,7 +119,11 @@ impl<I, S> Joiner<I, S> where I: std::iter::Iterator, S: std::fmt::Display, I::I
 }
 
 impl<I, S> From<Joiner<I, S>> for String
-where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
+where
+    I: std::iter::Iterator,
+    S: std::fmt::Display,
+    I::Item: std::fmt::Display,
+{
     #[inline]
     fn from(value: Joiner<I, S>) -> Self {
         value.into_string()
@@ -121,18 +131,29 @@ where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display {
 }
 
 impl<I, S> Clone for Joiner<I, S>
-where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, I: Clone, S: Clone {
+where
+    I: std::iter::Iterator,
+    S: std::fmt::Display,
+    I::Item: std::fmt::Display,
+    I: Clone,
+    S: Clone,
+{
     #[inline]
     fn clone(&self) -> Self {
         Self {
             iter: self.iter.clone(),
-            sep: self.sep.clone()
+            sep: self.sep.clone(),
         }
     }
 }
 
 impl<I, S> std::fmt::Display for Joiner<I, S>
-where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, I: Clone {
+where
+    I: std::iter::Iterator,
+    S: std::fmt::Display,
+    I::Item: std::fmt::Display,
+    I: Clone,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut iter = self.iter.clone();
         if let Some(first) = iter.next() {
@@ -152,31 +173,41 @@ where I: std::iter::Iterator, S: std::fmt::Display, I::Item: std::fmt::Display, 
 
 /// Trait that provides a method to join elements of an iterator, interspersing
 /// a separator between all elements.
-/// 
+///
 /// This trait is implemented for anything that implements
 /// [`std::iter::IntoIterator`], which is e.g. arrays, slices, [`Vec`], and more.
 pub trait Join<I: std::iter::Iterator>: std::iter::IntoIterator<IntoIter = I> {
     /// Join the elements of an iterator, interspersing a separator between
     /// all elements.
-    /// 
+    ///
     /// The elements and the separator need to implement [`std::fmt::Display`].
     fn join<S>(self, sep: S) -> Joiner<I, S>
-    where Self: Sized, S: std::fmt::Display, I::Item: std::fmt::Display {
+    where
+        Self: Sized,
+        S: std::fmt::Display,
+        I::Item: std::fmt::Display,
+    {
         Joiner {
             iter: self.into_iter(),
-            sep
+            sep,
         }
     }
 
     /// Join the elements of an iterator, interspersing a separator between
     /// all elements.
-    /// 
+    ///
     /// The elements and the separator need to implement [`AsRef<str>`].
     fn join_str<S>(self, sep: S) -> Joiner<DisplayIter<I>, DisplayWrapper<S>>
-    where Self: Sized, S: AsRef<str>, I::Item: AsRef<str> {
+    where
+        Self: Sized,
+        S: AsRef<str>,
+        I::Item: AsRef<str>,
+    {
         Joiner {
-            iter: DisplayIter { iter: self.into_iter() },
-            sep: DisplayWrapper (sep)
+            iter: DisplayIter {
+                iter: self.into_iter(),
+            },
+            sep: DisplayWrapper(sep),
         }
     }
 }
@@ -190,26 +221,33 @@ impl<T> Join<T::IntoIter> for T where T: std::iter::IntoIterator {}
 /// Helper for joining elements that only implement [`AsRef<str>`], but not [`std::fmt::Display`].
 #[repr(transparent)]
 #[derive(Debug)]
-pub struct DisplayWrapper<T: AsRef<str>> ( T );
+pub struct DisplayWrapper<T: AsRef<str>>(T);
 
 impl<T: AsRef<str>> DisplayWrapper<T> {
     #[inline]
     pub fn new(value: T) -> Self {
-        Self (value)
+        Self(value)
     }
 }
 
-impl<T> std::fmt::Display for DisplayWrapper<T> where T: AsRef<str> {
+impl<T> std::fmt::Display for DisplayWrapper<T>
+where
+    T: AsRef<str>,
+{
     #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.as_ref().fmt(f)
     }
 }
 
-impl<T> Clone for DisplayWrapper<T> where T: AsRef<str>, T: Clone {
+impl<T> Clone for DisplayWrapper<T>
+where
+    T: AsRef<str>,
+    T: Clone,
+{
     #[inline]
     fn clone(&self) -> Self {
-        Self (self.0.clone())
+        Self(self.0.clone())
     }
 }
 
@@ -219,44 +257,59 @@ impl<T> Clone for DisplayWrapper<T> where T: AsRef<str>, T: Clone {
 
 /// Iterator-facade that maps an iterator over [`AsRef<str>`] to an iterator
 /// over [`DisplayWrapper`].
-/// 
+///
 /// This is used to implement [`Join::join_str()`].
 #[derive(Debug)]
 pub struct DisplayIter<I>
-where I: std::iter::Iterator {
-    iter: I
+where
+    I: std::iter::Iterator,
+{
+    iter: I,
 }
 
-impl<I> DisplayIter<I> where I: std::iter::Iterator {
+impl<I> DisplayIter<I>
+where
+    I: std::iter::Iterator,
+{
     #[inline]
     pub fn new(elements: impl Join<I>) -> Self {
-        Self { iter: elements.into_iter() }
+        Self {
+            iter: elements.into_iter(),
+        }
     }
 }
 
 impl<I> std::iter::Iterator for DisplayIter<I>
-where I: std::iter::Iterator, I::Item: AsRef<str> {
+where
+    I: std::iter::Iterator,
+    I::Item: AsRef<str>,
+{
     type Item = DisplayWrapper<I::Item>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(item) = self.iter.next() {
-            return Some(DisplayWrapper (item));
+            return Some(DisplayWrapper(item));
         }
         None
     }
 
     #[inline]
     fn last(self) -> Option<Self::Item>
-    where Self: Sized {
+    where
+        Self: Sized,
+    {
         if let Some(item) = self.iter.last() {
-            return Some(DisplayWrapper (item));
+            return Some(DisplayWrapper(item));
         }
         None
     }
 
     #[inline]
-    fn count(self) -> usize where Self: Sized {
+    fn count(self) -> usize
+    where
+        Self: Sized,
+    {
         self.iter.count()
     }
 
@@ -279,13 +332,18 @@ where I: std::iter::Iterator, I::Item: AsRef<str> {
     #[inline]
     #[cfg(target_feature = "trusted_random_access")]
     unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item
-    where Self: TrustedRandomAccessNoCoerce {
-        DisplayWrapper (self.iter.__iterator_get_unchecked(idx))
+    where
+        Self: TrustedRandomAccessNoCoerce,
+    {
+        DisplayWrapper(self.iter.__iterator_get_unchecked(idx))
     }
 }
 
 impl<I> std::iter::ExactSizeIterator for DisplayIter<I>
-where I: std::iter::ExactSizeIterator, I::Item: AsRef<str> {
+where
+    I: std::iter::ExactSizeIterator,
+    I::Item: AsRef<str>,
+{
     #[inline]
     fn len(&self) -> usize {
         self.iter.len()
@@ -299,11 +357,14 @@ where I: std::iter::ExactSizeIterator, I::Item: AsRef<str> {
 }
 
 impl<I> std::iter::DoubleEndedIterator for DisplayIter<I>
-where I: std::iter::DoubleEndedIterator, I::Item: AsRef<str> {
+where
+    I: std::iter::DoubleEndedIterator,
+    I::Item: AsRef<str>,
+{
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if let Some(item) = self.iter.next_back() {
-            return Some(DisplayWrapper (item));
+            return Some(DisplayWrapper(item));
         }
         None
     }
@@ -311,7 +372,7 @@ where I: std::iter::DoubleEndedIterator, I::Item: AsRef<str> {
     #[inline]
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
         if let Some(item) = self.iter.nth_back(n) {
-            return Some(DisplayWrapper (item));
+            return Some(DisplayWrapper(item));
         }
         None
     }
@@ -323,11 +384,15 @@ where I: std::iter::DoubleEndedIterator, I::Item: AsRef<str> {
     }
 }
 
-impl<I> Clone for DisplayIter<I> where I: std::iter::Iterator, I: Clone {
+impl<I> Clone for DisplayIter<I>
+where
+    I: std::iter::Iterator,
+    I: Clone,
+{
     #[inline]
     fn clone(&self) -> Self {
         Self {
-            iter: self.iter.clone()
+            iter: self.iter.clone(),
         }
     }
 }
@@ -338,27 +403,27 @@ impl<I> Clone for DisplayIter<I> where I: std::iter::Iterator, I: Clone {
 
 /// Join anything that implements [`Join`]. The elements need to implement
 /// [`std::fmt::Display`].
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use join_string::join;
-/// 
+///
 /// assert_eq!(
 ///     join(&["foo", "bar", "baz"], ", ").into_string(),
 ///     "foo, bar, baz"
 /// );
-/// 
+///
 /// assert_eq!(
 ///     join([1, 2, 3].as_slice(), ", ").into_string(),
 ///     "1, 2, 3"
 /// );
-/// 
+///
 /// assert_eq!(
 ///     join(&vec!['a', 'b', 'c'], ", ").into_string(),
 ///     "a, b, c"
 /// );
-/// 
+///
 /// assert_eq!(
 ///     join([
 ///         "foo".to_owned(),
@@ -370,23 +435,27 @@ impl<I> Clone for DisplayIter<I> where I: std::iter::Iterator, I: Clone {
 /// ```
 #[inline]
 pub fn join<I, S>(elements: impl Join<I>, sep: S) -> Joiner<I, S>
-where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
+where
+    I: std::iter::Iterator,
+    I::Item: std::fmt::Display,
+    S: std::fmt::Display,
+{
     elements.join(sep)
 }
 
 /// Join anything that implements [`Join`] when elements don't implement
 /// [`std::fmt::Display`], but implement [`AsRef<str>`] instead.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use join_string::join_str;
-/// 
+///
 /// assert_eq!(
 ///     join_str(&["foo", "bar", "baz"], ", ").into_string(),
 ///     "foo, bar, baz"
 /// );
-/// 
+///
 /// assert_eq!(
 ///     join_str([
 ///         &"foo".to_owned(),
@@ -395,12 +464,12 @@ where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
 ///     ].as_slice(), ", ").into_string(),
 ///     "foo, bar, baz"
 /// );
-/// 
+///
 /// assert_eq!(
 ///     join_str(&vec!["foo", "bar", "baz"], ", ").into_string(),
 ///     "foo, bar, baz"
 /// );
-/// 
+///
 /// assert_eq!(
 ///     join_str([
 ///         "foo".to_owned(),
@@ -411,7 +480,14 @@ where I: std::iter::Iterator, I::Item: std::fmt::Display, S: std::fmt::Display {
 /// );
 /// ```
 #[inline]
-pub fn join_str<I, S>(elements: impl Join<I>, sep: S) -> Joiner<impl std::iter::Iterator<Item = impl std::fmt::Display>, impl std::fmt::Display>
-where I: std::iter::Iterator, I::Item: AsRef<str>, S: AsRef<str> {
-    DisplayIter::new(elements).join(DisplayWrapper (sep))
+pub fn join_str<I, S>(
+    elements: impl Join<I>,
+    sep: S,
+) -> Joiner<impl std::iter::Iterator<Item = impl std::fmt::Display>, impl std::fmt::Display>
+where
+    I: std::iter::Iterator,
+    I::Item: AsRef<str>,
+    S: AsRef<str>,
+{
+    DisplayIter::new(elements).join(DisplayWrapper(sep))
 }
