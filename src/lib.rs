@@ -181,6 +181,7 @@ pub trait Join<I: std::iter::Iterator>: std::iter::IntoIterator<IntoIter = I> {
     /// all elements.
     ///
     /// The elements and the separator need to implement [`std::fmt::Display`].
+    #[inline]
     fn join<S>(self, sep: S) -> Joiner<I, S>
     where
         Self: Sized,
@@ -197,6 +198,7 @@ pub trait Join<I: std::iter::Iterator>: std::iter::IntoIterator<IntoIter = I> {
     /// all elements.
     ///
     /// The elements and the separator need to implement [`AsRef<str>`].
+    #[inline]
     fn join_str<S>(self, sep: S) -> Joiner<DisplayIter<I>, DisplayWrapper<S>>
     where
         Self: Sized,
