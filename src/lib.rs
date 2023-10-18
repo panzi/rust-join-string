@@ -63,7 +63,6 @@
 // =============================================================================
 
 /// Helper struct that captures the iterator and separator for later joining.
-#[derive(Debug)]
 pub struct Joiner<I, S>
 where
     I: std::iter::Iterator,
@@ -77,7 +76,6 @@ impl<I, S> Joiner<I, S>
 where
     I: std::iter::Iterator,
     S: std::fmt::Display,
-    I::Item: std::fmt::Display,
 {
     /// Create a [`Joiner`] object.
     ///
@@ -89,14 +87,16 @@ where
 
     /// Consumes the backing iterator of a [`Joiner`] and returns the joined elements as a new [`String`].
     #[inline]
-    pub fn into_string(self) -> String {
+    pub fn into_string(self) -> String
+    where I::Item: std::fmt::Display {
         let mut buffer = String::new();
         let _ = self.write_fmt(&mut buffer);
         buffer
     }
 
     /// Consumes the backing iterator of a [`Joiner`] and writes the joined elements into a [`std::fmt::Write`].
-    pub fn write_fmt<W: std::fmt::Write>(mut self, mut writer: W) -> std::fmt::Result {
+    pub fn write_fmt<W: std::fmt::Write>(mut self, mut writer: W) -> std::fmt::Result
+    where I::Item: std::fmt::Display {
         if let Some(first) = self.iter.next() {
             write!(writer, "{}", first)?;
             for item in self.iter {
@@ -107,7 +107,8 @@ where
     }
 
     /// Consumes the backing iterator of a [`Joiner`] and writes the joined elements into a [`std::io::Write`].
-    pub fn write_io<W: std::io::Write>(mut self, mut writer: W) -> std::io::Result<()> {
+    pub fn write_io<W: std::io::Write>(mut self, mut writer: W) -> std::io::Result<()>
+    where I::Item: std::fmt::Display {
         if let Some(first) = self.iter.next() {
             write!(writer, "{}", first)?;
             for item in self.iter {
@@ -167,6 +168,25 @@ where
     }
 }
 
+impl<I, S> std::fmt::Debug for Joiner<I, S>
+where
+    I: std::iter::Iterator,
+    S: std::fmt::Display,
+    I::Item: std::fmt::Debug,
+    I: Clone,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut iter = self.iter.clone();
+        if let Some(first) = iter.next() {
+            first.fmt(f)?;
+            for item in iter {
+                self.sep.fmt(f)?;
+                item.fmt(f)?;
+            }
+        }
+        Ok(())
+    }
+}
 // =============================================================================
 //      trait Join
 // =============================================================================
@@ -186,7 +206,6 @@ pub trait Join<I: std::iter::Iterator>: std::iter::IntoIterator<IntoIter = I> {
     where
         Self: Sized,
         S: std::fmt::Display,
-        I::Item: std::fmt::Display,
     {
         Joiner {
             iter: self.into_iter(),
@@ -449,7 +468,6 @@ where
 pub fn join<I, S>(elements: impl Join<I>, sep: S) -> Joiner<I, S>
 where
     I: std::iter::Iterator,
-    I::Item: std::fmt::Display,
     S: std::fmt::Display,
 {
     elements.join(sep)

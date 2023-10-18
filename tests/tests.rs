@@ -275,3 +275,19 @@ fn joiner_new() {
 
     assert_eq!(cont.join(", ").into_string(), "foo, bar, baz");
 }
+
+#[test]
+fn debug() {
+    #[derive(Debug)]
+    struct MyStruct {
+        #[allow(unused)]
+        value: u32
+    }
+
+    assert_eq!(format!("{:?}", ['a', 'b', 'c'].join(", ")), "'a', 'b', 'c'");
+    assert_eq!(format!("{:?}", [
+        &MyStruct { value: 1 },
+        &MyStruct { value: 2 },
+        &MyStruct { value: 3 },
+    ].join(", ")), "MyStruct { value: 1 }, MyStruct { value: 2 }, MyStruct { value: 3 }");
+}
